@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import info.unlp.comunicadoraccesible.AccessibilityViewModel
 
@@ -39,9 +40,9 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     Row(modifier = Modifier.fillMaxSize()) {
         // 3/4 section for questions
-        Box(modifier = Modifier.weight(3f) , contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.weight(3f), contentAlignment = Alignment.Center) {
             OutlinedTextField(
-                textStyle = MaterialTheme.typography.titleMedium,
+                textStyle = MaterialTheme.typography.titleLarge.copy(textAlign = TextAlign.Center),
                 value = text,
                 onValueChange = { text = it },
                 modifier = Modifier
@@ -49,14 +50,19 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
                     .padding(24.dp)
                     .background(Color.Transparent, shape = RoundedCornerShape(8.dp))
                     .heightIn(min = 250.dp)
-                    .align(Alignment.CenterStart),
+                    .align(Alignment.Center),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = false,
                 maxLines = 10,
                 placeholder = {
-                    ScalableText(text = "Escriba aquí...", textStyle = MaterialTheme.typography.bodyLarge, accessibilityViewModel = accessibilityViewModel) },
+                    ScalableText(
+                        text = "Escriba aquí...",
+                        textStyle = MaterialTheme.typography.titleLarge.copy(textAlign = TextAlign.Center),
+                        accessibilityViewModel = accessibilityViewModel
+                    )
+                },
 
-            )
+                )
         }
 
         Column(

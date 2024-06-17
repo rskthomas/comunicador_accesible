@@ -1,7 +1,9 @@
 package info.unlp.comunicadoraccesible.ui
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,9 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -106,7 +108,9 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                     "Leer",
                     textStyle = MaterialTheme.typography.bodyLarge,
                     accessibilityViewModel,
-                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp).align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp, 0.dp, 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
             }
         }
@@ -123,6 +127,8 @@ fun QuestionList(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(400.dp * accessibilityViewModel.buttonSize)
@@ -132,17 +138,12 @@ fun QuestionList(
         items(questions.size) { index ->
             val question = questions[index]
             val isSelected = question == selectedQuestion
-
             QuestionItem(
                 accessibilityViewModel,
                 question = question,
                 isSelected = isSelected,
                 onClick = { onSelectQuestion(question) })
-            Spacer(
-                modifier = Modifier
-                    .width(8.dp)
-                    .height(8.dp)
-            )
+
         }
     }
 }
@@ -155,6 +156,7 @@ fun QuestionItem(
     onClick: () -> Unit
 ) {
     Card(
+        border = BorderStroke(2.dp,MaterialTheme.colorScheme.primary),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
@@ -163,9 +165,16 @@ fun QuestionItem(
             .fillMaxWidth()
             .clickable { onClick() }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 70.dp * accessibilityViewModel.buttonSize, max = 150.dp * accessibilityViewModel.buttonSize)
+                .padding(8.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
             Checkbox(checked = isSelected, onCheckedChange = null)
-
             ScalableText(
                 text = question,
                 textStyle = MaterialTheme.typography.bodyMedium,
