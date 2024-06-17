@@ -15,9 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Speaker
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,7 +44,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 
 @Composable
-fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: QuestionsViewModel ) {
+fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: QuestionsViewModel) {
 
     val categories = viewModel.categories
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
@@ -83,29 +84,33 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
             }
 
             val context = LocalContext.current
-            Button(
-                enabled = selectedQuestion != null,
-                onClick = { viewModel.textToSpeech(context, selectedQuestion ?: "") },
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .weight(1f)
-                    .align(Alignment.CenterVertically)
-                    .padding(8.dp)
-                    .size(48.dp * accessibilityViewModel.buttonSize)
+                    .align(Alignment.CenterVertically),
             ) {
-                Row {
+                Button(
+                    modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
+                    shape = CircleShape,
+                    enabled = selectedQuestion != null,
+                    onClick = { viewModel.textToSpeech(context, selectedQuestion ?: "") }
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Speaker,
-                        contentDescription = "Leer en voz alta"
+                        modifier = Modifier.size(48.dp * accessibilityViewModel.buttonSize),
+                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                        contentDescription = "Leer en voz alta",
+                        tint = if (selectedQuestion != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                     )
-                    ScalableText(
-                        "Leer",
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        accessibilityViewModel
-                    )
-
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                ScalableText(
+                    "Leer",
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    accessibilityViewModel,
+                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp).align(Alignment.CenterHorizontally)
+                )
             }
-
         }
     }
 
@@ -240,15 +245,13 @@ class QuestionsViewModel : ViewModel() {
         loadQuestions("Asuntos Académicos")
     }
 
-
-
     private var textToSpeech: TextToSpeech? = null
     fun changeCategory(category: String) {
         _currentCategory.value = category
         loadQuestions(_currentCategory.value)
     }
 
-    private fun loadQuestions(category: String){
+    private fun loadQuestions(category: String) {
         _questions.value = allQuestions[category] ?: emptyList()
     }
 
