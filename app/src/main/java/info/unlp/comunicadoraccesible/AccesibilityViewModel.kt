@@ -13,6 +13,20 @@ class AccessibilityViewModel : ViewModel() {
         textScale = newScale
     }
 
-    // Add other accessibility settings as needed
+    // volume functionality
+    var volume by mutableStateOf(1.0f)
+        private set
+
+    fun updateVolume(newVolume: Float) {
+        volume = newVolume
+    }
+    //button size
+    var buttonSize by mutableStateOf(1.0f)
+        private set
+
+    fun updateButtonSize(newSize: Float) {
+        buttonSize = newSize
+
+    }
 
 }

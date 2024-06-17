@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -25,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import info.unlp.comunicadoraccesible.AccessibilityViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object FAQ : Screen("faq", "FAQ", Icons.Default.Info)
@@ -36,17 +38,21 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 @Composable
 fun BottomNav() {
     val navController = rememberNavController()
+    val accessibilityViewModel = AccessibilityViewModel()
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController)
+            BottomNavigationBar(navController, accessibilityViewModel)
         }
     ) {
-        Navigation(navController, it)
+        Navigation(navController, it, accessibilityViewModel)
     }
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(
+    navController: NavController,
+    accessibilityViewModel: AccessibilityViewModel
+) {
     val items = listOf(
         Screen.FAQ,
         Screen.Teclado,
@@ -58,7 +64,7 @@ fun BottomNavigationBar(navController: NavController) {
         items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.title) },
-                label = { Text(item.title) },
+                label = { ScalableText(text = item.title, textStyle = MaterialTheme.typography.bodyMedium, accessibilityViewModel)},
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
@@ -77,10 +83,10 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun Navigation(navController: NavHostController, paddingValues: PaddingValues) {
+fun Navigation(navController: NavHostController, paddingValues: PaddingValues, accesibilityViewModel: AccessibilityViewModel) {
     NavHost(navController, startDestination = Screen.FAQ.route, modifier = Modifier.padding(paddingValues) ) {
         composable(Screen.FAQ.route) {
-            FAQScreen()
+            FAQScreen(accesibilityViewModel)
         }
         composable(Screen.Teclado.route) {
             TecladoScreen()
@@ -89,16 +95,8 @@ fun Navigation(navController: NavHostController, paddingValues: PaddingValues) {
             LenguajeScreen()
         }
         composable(Screen.Opciones.route) {
-            OpcionesScreen()
+            SettingsScreen(accesibilityViewModel)
         }
-    }
-}
-
-@Composable
-fun FAQScreen() {
-    // Your FAQ screen UI
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "FAQ Screen")
     }
 }
 
@@ -118,13 +116,7 @@ fun LenguajeScreen() {
     }
 }
 
-@Composable
-fun OpcionesScreen() {
-    // Your Opciones screen UI
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Opciones Screen")
-    }
-}
+
 
 @Composable
 fun currentRoute(navController: NavController): String? {
