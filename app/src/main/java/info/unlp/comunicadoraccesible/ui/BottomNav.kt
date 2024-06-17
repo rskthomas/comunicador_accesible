@@ -47,7 +47,7 @@ fun BottomNav() {
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        questionsViewModel.initializeTextToSpeech( context)
+        accessibilityViewModel.initializeTextToSpeech( context)
     }
     Scaffold(
         bottomBar = {
@@ -99,7 +99,7 @@ fun Navigation(navController: NavHostController, paddingValues: PaddingValues, a
             FAQScreen(accesibilityViewModel, questionsViewModel)
         }
         composable(Screen.Teclado.route) {
-            TecladoScreen()
+            KeyboardScreen(accesibilityViewModel)
         }
         composable(Screen.Lenguaje.route) {
             LenguajeScreen()
@@ -110,13 +110,7 @@ fun Navigation(navController: NavHostController, paddingValues: PaddingValues, a
     }
 }
 
-@Composable
-fun TecladoScreen() {
-    // Your Teclado screen UI
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Teclado Screen")
-    }
-}
+
 
 @Composable
 fun LenguajeScreen() {

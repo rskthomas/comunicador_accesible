@@ -1,7 +1,6 @@
 package info.unlp.comunicadoraccesible.ui
 
-import android.content.Context
-import android.speech.tts.TextToSpeech
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,7 +40,6 @@ import androidx.lifecycle.ViewModel
 import info.unlp.comunicadoraccesible.AccessibilityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.Locale
 
 @Composable
 fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: QuestionsViewModel) {
@@ -94,7 +92,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                     modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
                     shape = CircleShape,
                     enabled = selectedQuestion != null,
-                    onClick = { viewModel.textToSpeech(context, selectedQuestion ?: "") }
+                    onClick = { accessibilityViewModel.speakQuestion(selectedQuestion ?: "") }
                 ) {
                     Icon(
                         modifier = Modifier.size(48.dp * accessibilityViewModel.buttonSize),
@@ -245,7 +243,6 @@ class QuestionsViewModel : ViewModel() {
         loadQuestions("Asuntos Académicos")
     }
 
-    private var textToSpeech: TextToSpeech? = null
     fun changeCategory(category: String) {
         _currentCategory.value = category
         loadQuestions(_currentCategory.value)
@@ -255,22 +252,5 @@ class QuestionsViewModel : ViewModel() {
         _questions.value = allQuestions[category] ?: emptyList()
     }
 
-    fun textToSpeech(context: Context, question: String) {
-        textToSpeech = TextToSpeech(
-            context
-        ) {
-            if (it == TextToSpeech.SUCCESS) {
-                textToSpeech?.let { txtToSpeech ->
-                    txtToSpeech.language = Locale("es", "ES")
-                    txtToSpeech.setSpeechRate(1.0f)
-                    txtToSpeech.speak(
-                        question,
-                        TextToSpeech.QUEUE_ADD,
-                        null,
-                        null
-                    )
-                }
-            }
-        }
-    }
+
 }
