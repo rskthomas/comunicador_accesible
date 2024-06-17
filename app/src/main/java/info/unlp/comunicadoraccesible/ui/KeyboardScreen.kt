@@ -61,8 +61,7 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
                         accessibilityViewModel = accessibilityViewModel
                     )
                 },
-
-                )
+            )
         }
 
         Column(

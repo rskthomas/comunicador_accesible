@@ -1,6 +1,7 @@
 package info.unlp.comunicadoraccesible
 
 import android.content.Context
+import android.media.AudioManager
 import android.speech.tts.TextToSpeech
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +10,12 @@ import androidx.lifecycle.ViewModel
 import java.util.Locale
 
 class AccessibilityViewModel : ViewModel() {
+
+
+    private lateinit var audioManager: AudioManager
+
+    var volume by mutableStateOf(1f)
+
     var textScale by mutableStateOf(1.0f)
         private set
 
@@ -17,12 +24,18 @@ class AccessibilityViewModel : ViewModel() {
     }
 
     private var textToSpeech: TextToSpeech? = null
-    // volume functionality
-    var volume by mutableStateOf(1.0f)
-        private set
+
+
 
     fun updateVolume(newVolume: Float) {
         volume = newVolume
+        val normalizedVolume = (newVolume - 1f) / 0.8f
+        // Convert normalizedVolume to the scale used by the AudioManager
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val newVolumeLevel = (normalizedVolume * maxVolume).toInt()
+
+        // Set the new volume level
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolumeLevel, 0)
     }
     //button size
     var buttonSize by mutableStateOf(1.0f)
@@ -33,6 +46,9 @@ class AccessibilityViewModel : ViewModel() {
 
     }
     fun initializeTextToSpeech(context: Context) {
+        //and also volume
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
         if (textToSpeech == null) {
             textToSpeech = TextToSpeech(context) { status ->
                 if (status == TextToSpeech.SUCCESS) {
