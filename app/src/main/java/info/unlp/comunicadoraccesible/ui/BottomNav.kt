@@ -3,6 +3,7 @@ package info.unlp.comunicadoraccesible.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -39,12 +41,13 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 fun BottomNav() {
     val navController = rememberNavController()
     val accessibilityViewModel = AccessibilityViewModel()
+    val questionsViewModel = QuestionsViewModel()
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController, accessibilityViewModel)
+            BottomNavigationBar(navController, accessibilityViewModel, )
         }
     ) {
-        Navigation(navController, it, accessibilityViewModel)
+        Navigation(navController, it, accessibilityViewModel,questionsViewModel)
     }
 }
 
@@ -59,7 +62,7 @@ fun BottomNavigationBar(
         Screen.Lenguaje,
         Screen.Opciones
     )
-    NavigationBar {
+    NavigationBar(modifier = Modifier.height(65.dp * accessibilityViewModel.buttonSize)) {
         val currentRoute = currentRoute(navController)
         items.forEach { item ->
             NavigationBarItem(
@@ -83,10 +86,10 @@ fun BottomNavigationBar(
 }
 
 @Composable
-fun Navigation(navController: NavHostController, paddingValues: PaddingValues, accesibilityViewModel: AccessibilityViewModel) {
+fun Navigation(navController: NavHostController, paddingValues: PaddingValues, accesibilityViewModel: AccessibilityViewModel, questionsViewModel: QuestionsViewModel ) {
     NavHost(navController, startDestination = Screen.FAQ.route, modifier = Modifier.padding(paddingValues) ) {
         composable(Screen.FAQ.route) {
-            FAQScreen(accesibilityViewModel)
+            FAQScreen(accesibilityViewModel, questionsViewModel)
         }
         composable(Screen.Teclado.route) {
             TecladoScreen()

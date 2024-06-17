@@ -2,142 +2,257 @@ package info.unlp.comunicadoraccesible.ui
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import info.unlp.comunicadoraccesible.AccessibilityViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FAQScreen(accessibilityViewModel: AccessibilityViewModel) {
+fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: QuestionsViewModel ) {
 
-    val viewModel = QuestionsViewModel()
     val categories = viewModel.categories
-    var selectedCategory by remember { mutableStateOf(categories[0]) }
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
+    var selectedCategory by remember { mutableStateOf<String?>(categories.first()) }
+    val questions by viewModel.questions.collectAsState()
 
     Column {
         TabRow(selectedTabIndex = categories.indexOf(selectedCategory)) {
-            categories.forEach{ category ->
+            categories.forEach { category ->
                 Tab(
-                    text = { ScalableText(text = category, textStyle = MaterialTheme.typography.bodyMedium, accessibilityViewModel)},
+                    text = {
+                        ScalableText(
+                            text = category,
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            accessibilityViewModel
+                        )
+                    },
                     selected = selectedCategory == category,
                     onClick = {
                         selectedCategory = category
-                        viewModel.changeCategory(category) }
+                        viewModel.changeCategory(category)
+                    }
                 )
             }
         }
-
         Row(modifier = Modifier.fillMaxSize()) {
             // 3/4 section for questions
             Box(modifier = Modifier.weight(3f)) {
-                Column {
-                    QuestionList(
-                        accessibilityViewModel = accessibilityViewModel,
-                        questionsViewModel = viewModel,
-                        onSelectQuestion = { question ->
-                            selectedQuestion = question
-                        },
-                        selectedQuestion = selectedQuestion
-                    )
-                }
+                QuestionList(
+                    accessibilityViewModel = accessibilityViewModel,
+                    questions = questions,
+                    onSelectQuestion = { question ->
+                        selectedQuestion = question
+                    },
+                    selectedQuestion = selectedQuestion
+                )
             }
 
             val context = LocalContext.current
             Button(
-                onClick = { viewModel.textToSpeech(context, selectedQuestion?: "") },
-                modifier = Modifier.weight(1f)
+                enabled = selectedQuestion != null,
+                onClick = { viewModel.textToSpeech(context, selectedQuestion ?: "") },
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
+                    .padding(8.dp)
+                    .size(48.dp * accessibilityViewModel.buttonSize)
             ) {
-                ScalableText("Read Aloud", textStyle = MaterialTheme.typography.bodyMedium, accessibilityViewModel)
+                Row {
+                    Icon(
+                        imageVector = Icons.Default.Speaker,
+                        contentDescription = "Leer en voz alta"
+                    )
+                    ScalableText(
+                        "Leer",
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        accessibilityViewModel
+                    )
+
+                }
             }
-        }
 
+        }
     }
+
 }
+
 @Composable
-fun QuestionList(accessibilityViewModel: AccessibilityViewModel, questionsViewModel :QuestionsViewModel , onSelectQuestion: (String) -> Unit, selectedQuestion: String?) {
+fun QuestionList(
+    accessibilityViewModel: AccessibilityViewModel,
+    questions: List<String>,
+    onSelectQuestion: (String) -> Unit,
+    selectedQuestion: String?
+) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(100.dp),
+        columns = GridCells.Fixed(2),
         modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)) {
+            .fillMaxWidth()
+            .height(400.dp * accessibilityViewModel.buttonSize)
+            .padding(8.dp)
+    ) {
 
-        items (questionsViewModel.questions.size) { index ->
-            val question = questionsViewModel.questions[index]
+        items(questions.size) { index ->
+            val question = questions[index]
             val isSelected = question == selectedQuestion
-            QuestionItem(accessibilityViewModel, question = question, isSelected = isSelected, onClick = { onSelectQuestion(question) })
+
+            QuestionItem(
+                accessibilityViewModel,
+                question = question,
+                isSelected = isSelected,
+                onClick = { onSelectQuestion(question) })
+            Spacer(
+                modifier = Modifier
+                    .width(8.dp)
+                    .height(8.dp)
+            )
         }
     }
 }
 
 @Composable
-fun QuestionItem(accessibilityViewModel: AccessibilityViewModel, question: String, isSelected: Boolean, onClick: () -> Unit) {
+fun QuestionItem(
+    accessibilityViewModel: AccessibilityViewModel,
+    question: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     Card(
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+        ),
         modifier = Modifier
-            .wrapContentWidth()
-            .padding(vertical = 4.dp)
+            .fillMaxWidth()
             .clickable { onClick() }
-            .background(if (isSelected) Color.LightGray else MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.elevatedCardElevation()
     ) {
-        ScalableText(
-            text = question,
-            textStyle = MaterialTheme.typography.bodyMedium,
-            accessibilityViewModel = accessibilityViewModel,
-            modifier = Modifier.padding(16.dp)
-        )
-        Checkbox(checked = isSelected, onCheckedChange = null)
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+            Checkbox(checked = isSelected, onCheckedChange = null)
+
+            ScalableText(
+                text = question,
+                textStyle = MaterialTheme.typography.bodyMedium,
+                accessibilityViewModel = accessibilityViewModel,
+                modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
+            )
+        }
+
     }
 }
+
 class QuestionsViewModel : ViewModel() {
-    val categories = listOf("Category 1", "Category 2", "Category 3")
-    private val allQuestions = mapOf(
-        "Category 1" to listOf("Question 1", "Question 2", "Question 3", "Question 4"),
-        "Category 2" to listOf("Question 5", "Question 6", "Question 7", "Question 8"),
-        "Category 3" to listOf("Question 7", "Question 8", "Question 9", "Question 10")
+
+    val categories = listOf(
+        "Asuntos Académicos",
+        "Becas y ayudas económicas",
+        "Fechas y plazos",
+        "Ingreso a la UNLP",
+        "Inscripción a materias",
+        "Otras consultas"
     )
-    var currentCategory by mutableStateOf("Category 1")
+    private val allQuestions = mapOf(
+        "Asuntos Académicos" to listOf(
+            "¿Cómo puedo solicitar un certificado de alumno regular?",
+            "¿Cómo puedo solicitar un certificado analítico?",
+            "¿Cómo puedo solicitar un certificado de materias aprobadas?",
+            "¿Cómo puedo solicitar un certificado de materias cursadas?",
+            "¿Cómo puedo solicitar un certificado de promedio?"
+        ),
+        "Becas y ayudas económicas" to listOf(
+            "¿Cómo puedo solicitar una beca?",
+            "¿Cómo puedo solicitar una ayuda económica?",
+            "¿Cómo puedo solicitar una beca de transporte?",
+            "¿Cómo puedo solicitar una beca de comedor?",
+            "¿Cómo puedo solicitar una beca de material de estudio?"
+        ),
+        "Fechas y plazos" to listOf(
+            "¿Cuándo son las fechas de inscripción a materias?",
+            "¿Cuándo son las fechas de exámenes finales?",
+            "¿Cuándo son las fechas de cursada?",
+            "¿Cuándo son las fechas de vacaciones de invierno?",
+            "¿Cuándo son las fechas de vacaciones de verano?"
+        ),
+        "Ingreso a la UNLP" to listOf(
+            "¿Cómo puedo inscribirme a la UNLP?",
+            "¿Cuáles son los requisitos para inscribirme a la UNLP?",
+            "¿Cuándo son las fechas de inscripción a la UNLP?",
+            "¿Cuándo son las fechas de exámenes de ingreso a la UNLP?",
+            "¿Cuándo son las fechas de cursada en la UNLP?"
+        ),
+        "Inscripción a materias" to listOf(
+            "¿Cómo puedo inscribirme a materias?",
+            "¿Cuáles son los requisitos para inscribirme a materias?",
+            "¿Cuándo son las fechas de inscripción a materias?",
+            "¿Cuándo son las fechas de exámenes de materias?",
+            "¿Cuándo son las fechas de cursada de materias?"
+        ),
+        "Otras consultas" to listOf(
+            "¿Cómo puedo solicitar un turno?",
+            "¿Cómo puedo solicitar un certificado de alumno regular?",
+            "¿Cómo puedo solicitar un certificado analítico?",
+            "¿Cómo puedo solicitar un certificado de materias aprobadas?",
+            "¿Cómo puedo solicitar un certificado de materias cursadas?"
+        )
+    )
+
+    private val _questions = MutableStateFlow<List<String>>(emptyList())
+    val questions: StateFlow<List<String>> get() = _questions
 
 
-    private var textToSpeech:TextToSpeech? = null
-    val questions: List<String>
-        get() = allQuestions[currentCategory] ?: emptyList()
+    private val _currentCategory = MutableStateFlow<String>("")
+    val currentCategory: StateFlow<String> get() = _currentCategory
 
-    fun changeCategory(category: String) {
-        currentCategory = category
+    init {
+        loadQuestions("Asuntos Académicos")
     }
-    fun textToSpeech(context: Context, question: String){
 
+
+
+    private var textToSpeech: TextToSpeech? = null
+    fun changeCategory(category: String) {
+        _currentCategory.value = category
+        loadQuestions(_currentCategory.value)
+    }
+
+    private fun loadQuestions(category: String){
+        _questions.value = allQuestions[category] ?: emptyList()
+    }
+
+    fun textToSpeech(context: Context, question: String) {
         textToSpeech = TextToSpeech(
             context
         ) {

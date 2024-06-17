@@ -36,7 +36,7 @@ fun SettingsScreen(viewModel: AccessibilityViewModel ) {
         Slider(
             value = viewModel.volume,
             onValueChange = { viewModel.updateVolume(it) },
-            valueRange = 0.0f..1.0f,
+            valueRange = 1f..1.8f,
             modifier = Modifier.fillMaxWidth()
         )
         //button size
@@ -48,7 +48,7 @@ fun SettingsScreen(viewModel: AccessibilityViewModel ) {
         Slider(
             value = viewModel.buttonSize,
             onValueChange = { viewModel.updateButtonSize(it) },
-            valueRange = 0.5f..1.5f,
+            valueRange = 1f..1.5f,
             modifier = Modifier.fillMaxWidth()
         )
 
