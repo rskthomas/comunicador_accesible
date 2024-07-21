@@ -3,20 +3,31 @@ package info.unlp.comunicadoraccesible.ui
 import android.content.Context
 import android.media.AudioManager
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import info.unlp.comunicadoraccesible.AccessibilityViewModel
@@ -33,11 +44,12 @@ fun SettingsScreen(viewModel: AccessibilityViewModel) {
             .width(300.dp)
     ) {
         ScalableText(
-            text = "Text scale",
+            text = "Tamaño del texto",
             textStyle = MaterialTheme.typography.bodyMedium,
             accessibilityViewModel = viewModel
         )
         CustomSlider(
+            label = "Tamaño del texto",
             viewModel = viewModel,
             value = viewModel.textScale,
             onValueChange = { viewModel.updateTextScale(it) },
@@ -47,11 +59,12 @@ fun SettingsScreen(viewModel: AccessibilityViewModel) {
 
         //volume control
         ScalableText(
-            text = "Volume",
+            text = "Volumen de la aplicación",
             textStyle = MaterialTheme.typography.bodyMedium,
             accessibilityViewModel = viewModel
         )
         CustomSlider(
+            label = "Volumen",
             viewModel = viewModel,
             value = viewModel.volume,
             onValueChange = { newVolume ->
@@ -65,11 +78,12 @@ fun SettingsScreen(viewModel: AccessibilityViewModel) {
 
         //button size
         ScalableText(
-            text = "Button size",
+            text = "Tamaño de la interfaz",
             textStyle = MaterialTheme.typography.bodyMedium,
             accessibilityViewModel = viewModel
         )
         CustomSlider(
+            label = "Tamaño de la Interfaz",
             viewModel = viewModel,
             value = viewModel.buttonSize,
             onValueChange = { viewModel.updateButtonSize(it) },
@@ -82,6 +96,7 @@ fun SettingsScreen(viewModel: AccessibilityViewModel) {
 
 @Composable
 fun CustomSlider(
+    label: String,
     viewModel: AccessibilityViewModel,
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -92,10 +107,12 @@ fun CustomSlider(
     Slider(
         value = value,
         onValueChange = onValueChange,
-
+        steps = 3,
         valueRange = valueRange,
-        modifier = modifier.clickable(enabled = true) {
-           view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        modifier = modifier.clickable() {
+            view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        }.semantics {
+            contentDescription = "$label slider"
         },
         colors = SliderDefaults.colors(
             thumbColor = lerp(
@@ -119,4 +136,38 @@ fun ScalableText(
         fontSize = textStyle.fontSize * accessibilityViewModel.textScale,
         modifier = modifier
     )
+}
+
+@Composable
+fun ReadTextButton(
+    selectedQuestion: String?,
+    modifier: Modifier = Modifier,
+    accessibilityViewModel: AccessibilityViewModel,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Button(
+            modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
+            shape = CircleShape,
+            enabled = selectedQuestion != null,
+            onClick = onClick
+        ) {
+            Icon(
+                modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
+                imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                contentDescription = "Leer en voz alta",
+                tint = if (selectedQuestion != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        ScalableText(
+            "Leer",
+            textStyle = MaterialTheme.typography.titleLarge,
+            accessibilityViewModel,
+        )
+    }
 }

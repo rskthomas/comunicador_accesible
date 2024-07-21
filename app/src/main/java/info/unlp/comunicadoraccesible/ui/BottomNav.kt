@@ -5,21 +5,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -35,7 +35,7 @@ import info.unlp.comunicadoraccesible.AccessibilityViewModel
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object FAQ : Screen("faq", "FAQ", Icons.Default.Info)
     object Teclado : Screen("teclado", "Teclado", Icons.Default.Keyboard)
-    object Lenguaje : Screen("lenguaje", "Lenguaje", Icons.Default.Mic)
+    object Lenguaje : Screen("lenguaje", "Lenguaje", Icons.Default.CameraAlt)
     object Opciones : Screen("opciones", "Opciones", Icons.Default.Settings)
 }
 
@@ -114,9 +114,8 @@ fun Navigation(navController: NavHostController, paddingValues: PaddingValues, a
 
 @Composable
 fun LenguajeScreen() {
-    // Your Lenguaje screen UI
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Lenguaje Screen")
+    Box(contentAlignment = androidx.compose.ui.Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Icon(imageVector = Icons.Default.Construction, contentDescription = "Página en construcción", modifier = Modifier.size(100.dp))
     }
 }
 

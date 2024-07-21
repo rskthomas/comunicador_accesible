@@ -2,22 +2,13 @@ package info.unlp.comunicadoraccesible.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
@@ -57,40 +48,22 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
                 placeholder = {
                     ScalableText(
                         text = "Escriba aquí...",
-                        textStyle = MaterialTheme.typography.titleLarge.copy(textAlign = TextAlign.Center),
+                        textStyle = MaterialTheme.typography.titleLarge.copy(textAlign = TextAlign.Justify),
                         accessibilityViewModel = accessibilityViewModel
                     )
                 },
             )
         }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        ReadTextButton(
+            accessibilityViewModel = accessibilityViewModel,
+            selectedQuestion = text.text,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically),
-        ) {
-            Button(
-                modifier = androidx.compose.ui.Modifier.size(78.dp * accessibilityViewModel.buttonSize),
-                shape = CircleShape,
-                onClick = { accessibilityViewModel.speakQuestion(text.text) }
-            ) {
-                Icon(
-                    modifier = androidx.compose.ui.Modifier.size(48.dp * accessibilityViewModel.buttonSize),
-                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = "Leer en voz alta",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+            onClick = {
+                accessibilityViewModel.speakQuestion(text.text)
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            ScalableText(
-                "Leer",
-                textStyle = MaterialTheme.typography.bodyLarge,
-                accessibilityViewModel,
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-        }
+        )
+
     }
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,18 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,9 +66,18 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                 )
             }
         }
-        Row(modifier = Modifier.fillMaxSize()) {
-            // 3/4 section for questions
-            Box(modifier = Modifier.weight(3f)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+
+            // around 3/4 section for questions and 1/4 section for speak button
+            Box(
+                modifier = Modifier
+                    .weight(2.7f)
+                    .align(Alignment.CenterVertically)
+            ) {
                 QuestionList(
                     accessibilityViewModel = accessibilityViewModel,
                     questions = questions,
@@ -84,35 +88,16 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                 )
             }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            ReadTextButton(
+                accessibilityViewModel = accessibilityViewModel,
+                selectedQuestion = selectedQuestion,
                 modifier = Modifier
                     .weight(1f)
                     .align(Alignment.CenterVertically),
-            ) {
-                Button(
-                    modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
-                    shape = CircleShape,
-                    enabled = selectedQuestion != null,
-                    onClick = { accessibilityViewModel.speakQuestion(selectedQuestion ?: "") }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(48.dp * accessibilityViewModel.buttonSize),
-                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = "Leer en voz alta",
-                        tint = if (selectedQuestion != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                    )
+                onClick = {
+                    accessibilityViewModel.speakQuestion(selectedQuestion.orEmpty())
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                ScalableText(
-                    "Leer",
-                    textStyle = MaterialTheme.typography.bodyLarge,
-                    accessibilityViewModel,
-                    modifier = Modifier
-                        .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
+            )
         }
     }
 
@@ -132,7 +117,7 @@ fun QuestionList(
         horizontalArrangement = Arrangement.spacedBy(9.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp * accessibilityViewModel.buttonSize)
+            .height(340.dp * accessibilityViewModel.buttonSize)
             .padding(8.dp)
     ) {
 
@@ -167,6 +152,10 @@ fun QuestionItem(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
         ),
         modifier = Modifier
+            .heightIn(
+                min = 70.dp * accessibilityViewModel.buttonSize,
+                max = 150.dp * accessibilityViewModel.buttonSize
+            )
             .fillMaxWidth()
             .clickable {
                 onClick()
@@ -177,20 +166,21 @@ fun QuestionItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(
-                    min = 80.dp * accessibilityViewModel.buttonSize,
-                    max = 150.dp * accessibilityViewModel.buttonSize
-                )
-                .padding(8.dp)
-                .align(Alignment.CenterHorizontally)
+                .padding(16.dp)
         ) {
-            Checkbox(checked = isSelected, onCheckedChange = null)
-            ScalableText(
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(8.dp)
+            )
+
+            Text(
                 text = question,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                accessibilityViewModel = accessibilityViewModel,
-                modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
+                fontSize = MaterialTheme.typography.bodyMedium.fontSize * accessibilityViewModel.textScale,
+                //max text size is 20
+
             )
         }
 
@@ -202,7 +192,6 @@ class QuestionsViewModel : ViewModel() {
     val categories = listOf(
         "Asuntos Académicos",
         "Becas y ayudas económicas",
-        "Fechas y plazos",
         "Ingreso a la UNLP",
         "Inscripción a materias"
     )
