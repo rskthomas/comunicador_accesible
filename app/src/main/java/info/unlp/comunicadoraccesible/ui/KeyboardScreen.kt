@@ -1,6 +1,7 @@
 package info.unlp.comunicadoraccesible.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +30,9 @@ import info.unlp.comunicadoraccesible.AccessibilityViewModel
 fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
 
     var text by remember { mutableStateOf(TextFieldValue("")) }
-    Row(modifier = Modifier.fillMaxSize()) {
+    Row(horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxSize()) {
         // 3/4 section for questions
         Box(modifier = Modifier.weight(3f), contentAlignment = Alignment.Center) {
             OutlinedTextField(
@@ -38,20 +41,20 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
                 onValueChange = { text = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
+                    .padding(32.dp)
                     .background(Color.Transparent, shape = RoundedCornerShape(8.dp))
                     .heightIn(min = 250.dp)
                     .align(Alignment.Center),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = false,
                 maxLines = 10,
-                placeholder = {
+                supportingText = {
                     ScalableText(
-                        text = "Escriba aquí...",
-                        textStyle = MaterialTheme.typography.titleLarge.copy(textAlign = TextAlign.Justify),
+                        text = "Escriba su pregunta",
+                        textStyle = MaterialTheme.typography.titleLarge,
                         accessibilityViewModel = accessibilityViewModel
                     )
-                },
+                }
             )
         }
         ReadTextButton(
