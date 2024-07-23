@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -110,11 +112,13 @@ fun CustomSlider(
         onValueChange = onValueChange,
         steps = 3,
         valueRange = valueRange,
-        modifier = modifier.clickable() {
-            view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
-        }.semantics {
-            contentDescription = "$label slider"
-        },
+        modifier = modifier
+            .clickable() {
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            }
+            .semantics {
+                contentDescription = "$label slider"
+            },
         colors = SliderDefaults.colors(
             thumbColor = lerp(
                 MaterialTheme.colorScheme.onSecondary,
@@ -172,5 +176,29 @@ fun ReadTextButton(
             textStyle = MaterialTheme.typography.titleLarge,
             accessibilityViewModel,
         )
+    }
+}
+
+@Composable
+fun VoiceToTextButton(
+    modifier: Modifier = Modifier,
+    accessibilityViewModel: AccessibilityViewModel,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Mic,
+                contentDescription = "Escuchar",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }

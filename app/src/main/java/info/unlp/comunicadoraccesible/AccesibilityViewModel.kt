@@ -1,7 +1,10 @@
 package info.unlp.comunicadoraccesible
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
+import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,5 +72,12 @@ class AccessibilityViewModel : ViewModel() {
         textToSpeech?.shutdown()
     }
 
+    fun startVoiceInput(activity: Activity, requestCode: Int) {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Hable ahora...")
+        }
+        activity.startActivityForResult(intent, requestCode)
+    }
 
 }
