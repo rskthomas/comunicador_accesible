@@ -31,7 +31,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import info.unlp.comunicadoraccesible.AccessibilityViewModel
+import info.unlp.comunicadoraccesible.composables.ReadTextButton
+import info.unlp.comunicadoraccesible.composables.ScalableText
+import info.unlp.comunicadoraccesible.composables.VoiceToTextButton
+import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

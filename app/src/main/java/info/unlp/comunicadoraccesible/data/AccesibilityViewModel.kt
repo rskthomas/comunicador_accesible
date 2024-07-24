@@ -1,4 +1,4 @@
-package info.unlp.comunicadoraccesible
+package info.unlp.comunicadoraccesible.data
 
 import android.app.Activity
 import android.content.Context

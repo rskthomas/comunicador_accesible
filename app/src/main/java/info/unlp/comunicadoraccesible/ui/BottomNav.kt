@@ -30,7 +30,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import info.unlp.comunicadoraccesible.AccessibilityViewModel
+import info.unlp.comunicadoraccesible.composables.ScalableText
+import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
+import info.unlp.comunicadoraccesible.data.AppDao
+import info.unlp.comunicadoraccesible.data.QuestionsViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object FAQ : Screen("faq", "FAQ", Icons.Default.Info)
@@ -40,10 +43,10 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 }
 
 @Composable
-fun BottomNav() {
+fun BottomNav(appDao: AppDao) {
     val navController = rememberNavController()
     val accessibilityViewModel = AccessibilityViewModel()
-    val questionsViewModel = QuestionsViewModel()
+    val questionsViewModel = QuestionsViewModel(appDao)
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
