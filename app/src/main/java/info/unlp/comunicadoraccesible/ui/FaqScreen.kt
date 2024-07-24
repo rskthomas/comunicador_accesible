@@ -1,13 +1,10 @@
 package info.unlp.comunicadoraccesible.ui
 
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,13 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import info.unlp.comunicadoraccesible.AccessibilityViewModel
+import info.unlp.comunicadoraccesible.composables.QuestionItem
+import info.unlp.comunicadoraccesible.composables.ReadTextButton
+import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
 import info.unlp.comunicadoraccesible.data.QuestionsViewModel
 
 
@@ -50,9 +43,10 @@ import info.unlp.comunicadoraccesible.data.QuestionsViewModel
 @Composable
 fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: QuestionsViewModel) {
 
-    val categories = viewModel.categories
+    val categories = viewModel.categories.collectAsState().value
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
-    var selectedCategory by remember { mutableStateOf<String?>(categories[1]) }
+    var searchSelected by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<String?>("") }
     var searchQuery by remember { mutableStateOf("") }
     val allQuestions by viewModel.questions.collectAsState()
 
@@ -69,47 +63,50 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp * accessibilityViewModel.buttonSize),
-            selectedTabIndex = categories.indexOf(selectedCategory),
+            selectedTabIndex = if (categories.isNotEmpty()) categories.indexOf(selectedCategory) else 0,
         ) {
-
-            categories.forEach { category ->
-
-                if (category != categories[0]) {
-                    Tab(
-                        text = {
-                            Text(
-                                text = category,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        },
-                        selected = selectedCategory == category,
-                        onClick = {
-                            selectedCategory = category
-                            viewModel.changeCategory(category)
-                            searchQuery = ""
-                        }
+            //Searchtab
+            Tab(
+                icon = {
+                    Icon(
+                        if (selectedCategory == "Search") Icons.Outlined.Search else Icons.Filled.Search,
+                        contentDescription = "Buscar preguntas",
+                        modifier = Modifier.size(24.dp)
                     )
-                } else
-                    Tab(
-                        icon = {
-                            Icon(
-                                if (selectedCategory == "Search") Icons.Outlined.Search else Icons.Filled.Search,
-                                contentDescription = "Buscar preguntas",
-                                modifier = Modifier.size(24.dp)
-                            )
+                },
+                selected = searchSelected,
+                onClick = {
+                    searchSelected = true
+                    searchQuery = ""
+                }
+            )
 
-                        },
-                        selected = selectedCategory == category,
-                        onClick = {
-                            selectedCategory = category
-                            searchQuery = ""
-                        }
-                    )
+             if (categories.isNotEmpty()) categories.forEach { category ->
+
+                Tab(
+                    text = {
+                        Text(
+                            text = category,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
+                    selected = selectedCategory == category,
+                    onClick = {
+                        searchSelected = false
+                        selectedCategory = category
+                        viewModel.changeCategory(category)
+                        searchQuery = ""
+                    }
+                )
             }
         }
 
-        if (selectedCategory == categories[0]) {
-            SecondaryTabRow(selectedTabIndex = 0, modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        if (searchSelected) {
+            SecondaryTabRow(
+                selectedTabIndex = 0, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
                 OutlinedTextField(
                     textStyle = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
@@ -196,58 +193,4 @@ fun QuestionList(
     }
 }
 
-@Composable
-fun QuestionItem(
-    accessibilityViewModel: AccessibilityViewModel,
-    question: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-
-    val haptic = LocalHapticFeedback.current
-    Card(
-        elevation = CardDefaults.elevatedCardElevation(8.dp),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-        ),
-        modifier = Modifier
-
-            .heightIn(
-                min = 60.dp * accessibilityViewModel.buttonSize,
-                max = 90.dp * accessibilityViewModel.buttonSize
-            )
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .fillMaxHeight()
-        ) {
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(start = 16.dp, end = 8.dp)
-                    .align(Alignment.CenterVertically)
-            )
-
-            Text(
-                modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterVertically),
-                text = question,
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize * accessibilityViewModel.textScale,
-                //max text size is 20
-
-            )
-        }
-
-    }
-}
 

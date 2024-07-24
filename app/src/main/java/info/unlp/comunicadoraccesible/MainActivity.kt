@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.example.compose.AppTheme
+import info.unlp.comunicadoraccesible.data.ComunicadorDatabase
 import info.unlp.comunicadoraccesible.databinding.ActivityMainBinding
 import info.unlp.comunicadoraccesible.ui.BottomNav
 
@@ -14,11 +15,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //set material design theme
+        val database = ComunicadorDatabase.getDatabase(this)
 
         supportActionBar?.hide()
         setContent {
             AppTheme {
-                BottomNav()
+                BottomNav(database.appDao())
             }
         }
     }
