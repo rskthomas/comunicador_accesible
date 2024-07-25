@@ -168,7 +168,7 @@ fun QuestionItem(
 
             .heightIn(
                 min = 60.dp * accessibilityViewModel.buttonSize,
-                max = 90.dp * accessibilityViewModel.buttonSize
+                max = 80.dp * accessibilityViewModel.buttonSize
             )
             .fillMaxWidth()
             .clickable {

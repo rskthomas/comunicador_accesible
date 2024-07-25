@@ -16,7 +16,9 @@ import androidx.room.PrimaryKey
     ]
 )
 data class Question(
-    @PrimaryKey(autoGenerate = true) val id: Int,
     val text: String,
-    val categoryId: Int
+    val categoryId: Long,
+
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0
 )

@@ -1,6 +1,7 @@
 package info.unlp.comunicadoraccesible.ui
 
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import info.unlp.comunicadoraccesible.composables.QuestionItem
 import info.unlp.comunicadoraccesible.composables.ReadTextButton
+import info.unlp.comunicadoraccesible.composables.ScalableText
 import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
+import info.unlp.comunicadoraccesible.data.Question
 import info.unlp.comunicadoraccesible.data.QuestionsViewModel
 
 
@@ -44,149 +47,171 @@ import info.unlp.comunicadoraccesible.data.QuestionsViewModel
 fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: QuestionsViewModel) {
 
     val categories = viewModel.categories.collectAsState().value
+    val currentCategory = viewModel.currentCategory.collectAsState().value
+
+
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
     var searchSelected by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf<String?>("") }
     var searchQuery by remember { mutableStateOf("") }
-    val allQuestions by viewModel.questions.collectAsState()
+    val questions by viewModel.questions.collectAsState()
 
-    // Filter questions based on search query
-    val filteredQuestions = if (searchQuery.isEmpty()) {
-        allQuestions
-    } else {
-        allQuestions.filter { it.contains(searchQuery, ignoreCase = true) }
-    }
+    Log.d("FAQScreen", "Categories: $categories")
+    Log.d("FAQScreen", "Current category: $currentCategory")
+    Log.d("FAQScreen", "Questions: $questions")
+    Log.d("FAQScreen", "Selected question: $selectedQuestion")
+    Log.d("FAQScreen", "Search selected: $searchSelected")
+    Log.d("FAQScreen", "Search query: $searchQuery")
+
 
     Column {
+        Column {
 
-        ScrollableTabRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp * accessibilityViewModel.buttonSize),
-            selectedTabIndex = if (categories.isNotEmpty()) categories.indexOf(selectedCategory) else 0,
-        ) {
-            //Searchtab
-            Tab(
-                icon = {
-                    Icon(
-                        if (selectedCategory == "Search") Icons.Outlined.Search else Icons.Filled.Search,
-                        contentDescription = "Buscar preguntas",
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                selected = searchSelected,
-                onClick = {
-                    searchSelected = true
-                    searchQuery = ""
-                }
-            )
-
-             if (categories.isNotEmpty()) categories.forEach { category ->
-
+            ScrollableTabRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp * accessibilityViewModel.buttonSize),
+                selectedTabIndex = if (currentCategory == null || searchSelected) 0 else categories.indexOf(
+                    currentCategory
+                ) + 1,
+            ) {
+                //Searchtab
                 Tab(
-                    text = {
-                        Text(
-                            text = category,
-                            style = MaterialTheme.typography.bodyMedium,
+                    icon = {
+                        Icon(
+                            if (searchSelected) Icons.Outlined.Search else Icons.Filled.Search,
+                            contentDescription = "Buscar preguntas",
+                            modifier = Modifier.size(24.dp* accessibilityViewModel.buttonSize)
                         )
                     },
-                    selected = selectedCategory == category,
+                    selected = searchSelected,
                     onClick = {
-                        searchSelected = false
-                        selectedCategory = category
-                        viewModel.changeCategory(category)
+                        searchSelected = true
                         searchQuery = ""
                     }
                 )
+
+                if (categories.isNotEmpty()) categories.forEach { category ->
+                    Tab(
+                        text = {
+                            ScalableText(
+                                text = category.name,
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                accessibilityViewModel = accessibilityViewModel
+                            )
+                        },
+                        selected = currentCategory == category,
+                        onClick = {
+                            viewModel.changeCategory(category)
+                            searchSelected = false
+                            searchQuery = ""
+                        }
+                    )
+                }
+            }
+
+            if (searchSelected) {
+                SecondaryTabRow(
+                    selectedTabIndex = 0, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    OutlinedTextField(
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(
+                                min = 60.dp * accessibilityViewModel.buttonSize,
+                                max = 80.dp * accessibilityViewModel.buttonSize
+                            ),
+
+                        singleLine = true,
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            viewModel.queryQuestions(it)
+                        },
+                        label = { Text("Buscar preguntas") }
+                    )
+                }
             }
         }
 
-        if (searchSelected) {
-            SecondaryTabRow(
-                selectedTabIndex = 0, modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(2.7f)
+                    .align(Alignment.CenterVertically)
             ) {
-                OutlinedTextField(
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(
-                            min = 60.dp * accessibilityViewModel.buttonSize,
-                            max = 80.dp * accessibilityViewModel.buttonSize
-                        ),
-
-                    singleLine = true,
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Buscar preguntas") }
+                QuestionList(
+                    accessibilityViewModel = accessibilityViewModel,
+                    questions = questions,
+                    onSelectQuestion = { question ->
+                        selectedQuestion = question
+                    },
+                    selectedQuestion = selectedQuestion
                 )
             }
-        }
-    }
 
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(2.7f)
-                .align(Alignment.CenterVertically)
-        ) {
-            QuestionList(
+            ReadTextButton(
                 accessibilityViewModel = accessibilityViewModel,
-                questions = filteredQuestions,
-                onSelectQuestion = { question ->
-                    selectedQuestion = question
-                },
-                selectedQuestion = selectedQuestion
+                selectedQuestion = selectedQuestion,
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
+                onClick = {
+                    accessibilityViewModel.speakQuestion(selectedQuestion.orEmpty())
+                }
             )
         }
-
-        ReadTextButton(
-            accessibilityViewModel = accessibilityViewModel,
-            selectedQuestion = selectedQuestion,
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically),
-            onClick = {
-                accessibilityViewModel.speakQuestion(selectedQuestion.orEmpty())
-            }
-        )
     }
-
 }
 
 
 @Composable
 fun QuestionList(
     accessibilityViewModel: AccessibilityViewModel,
-    questions: List<String>,
+    questions: List<Question>,
     onSelectQuestion: (String) -> Unit,
     selectedQuestion: String?
 ) {
+
+    if (questions.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            ScalableText(
+                text = "No se encontraron preguntas",
+                textStyle = MaterialTheme.typography.bodyMedium,
+                accessibilityViewModel = accessibilityViewModel
+            )
+        }
+        return
+    }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(9.dp),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .height(340.dp * accessibilityViewModel.buttonSize)
-            .padding(8.dp)
+            .padding(24.dp)
     ) {
 
         items(questions.size) { index ->
             val question = questions[index]
-            val isSelected = question == selectedQuestion
+            val isSelected = question.text == selectedQuestion
             QuestionItem(
                 accessibilityViewModel,
-                question = question,
+                question = question.text,
                 isSelected = isSelected,
                 onClick = {
-                    onSelectQuestion(question)
+                    onSelectQuestion(question.text)
                 })
 
         }

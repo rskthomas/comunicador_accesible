@@ -7,5 +7,5 @@ import androidx.room.PrimaryKey
 data class Category(
     val name: String,
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0
+    val id: Long = 0
 )
