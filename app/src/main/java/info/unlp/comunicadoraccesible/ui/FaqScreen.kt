@@ -2,6 +2,7 @@ package info.unlp.comunicadoraccesible.ui
 
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,7 +81,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                         Icon(
                             if (searchSelected) Icons.Outlined.Search else Icons.Filled.Search,
                             contentDescription = "Buscar preguntas",
-                            modifier = Modifier.size(24.dp* accessibilityViewModel.buttonSize)
+                            modifier = Modifier.size(24.dp * accessibilityViewModel.buttonSize)
                         )
                     },
                     selected = searchSelected,
@@ -109,7 +110,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                 }
             }
 
-            if (searchSelected) {
+            AnimatedVisibility(searchSelected) {
                 SecondaryTabRow(
                     selectedTabIndex = 0, modifier = Modifier
                         .fillMaxWidth()

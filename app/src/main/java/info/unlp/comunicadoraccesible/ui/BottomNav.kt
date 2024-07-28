@@ -1,5 +1,7 @@
 package info.unlp.comunicadoraccesible.ui
 
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +20,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,20 +45,18 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 
 @Composable
 fun BottomNav(appDao: AppDao) {
-    val navController = rememberNavController()
-    val accessibilityViewModel = AccessibilityViewModel()
-    val questionsViewModel = QuestionsViewModel(appDao)
 
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        accessibilityViewModel.initializeTextToSpeech( context)
-    }
+    val navController = rememberNavController()
+    val accessibilityViewModel = AccessibilityViewModel(appDao, context)
+    val questionsViewModel = QuestionsViewModel(appDao)
+
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController, accessibilityViewModel, )
+            BottomNavigationBar(navController, accessibilityViewModel)
         }
     ) {
-        Navigation(navController, it, accessibilityViewModel,questionsViewModel)
+        Navigation(navController, it, accessibilityViewModel, questionsViewModel)
     }
 }
 
@@ -77,7 +76,13 @@ fun BottomNavigationBar(
         items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.title) },
-                label = { ScalableText(text = item.title, textStyle = MaterialTheme.typography.bodyMedium, accessibilityViewModel)},
+                label = {
+                    ScalableText(
+                        text = item.title,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        accessibilityViewModel
+                    )
+                },
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
@@ -96,32 +101,66 @@ fun BottomNavigationBar(
 }
 
 @Composable
-fun Navigation(navController: NavHostController, paddingValues: PaddingValues, accesibilityViewModel: AccessibilityViewModel, questionsViewModel: QuestionsViewModel ) {
-    NavHost(navController, startDestination = Screen.FAQ.route, modifier = Modifier.padding(paddingValues) ) {
-        composable(Screen.FAQ.route) {
+fun Navigation(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    accesibilityViewModel: AccessibilityViewModel,
+    questionsViewModel: QuestionsViewModel
+) {
+
+    NavHost(
+        navController,
+        startDestination = Screen.FAQ.route,
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+    ) {
+
+        composable(
+            Screen.FAQ.route,
+            enterTransition = { slideInVertically() },
+            exitTransition = { slideOutVertically() },
+        ) {
             FAQScreen(accesibilityViewModel, questionsViewModel)
         }
-        composable(Screen.Teclado.route) {
+        composable(
+            Screen.Teclado.route,
+            enterTransition = { slideInVertically() },
+            exitTransition = { slideOutVertically() },
+        ) {
             KeyboardScreen(accesibilityViewModel)
         }
-        composable(Screen.Lenguaje.route) {
+        composable(
+            Screen.Lenguaje.route,
+            enterTransition = { slideInVertically() },
+            exitTransition = { slideOutVertically() },
+        ) {
             LenguajeScreen()
         }
-        composable(Screen.Opciones.route) {
+        composable(
+            Screen.Opciones.route,
+            enterTransition = { slideInVertically() },
+            exitTransition = { slideOutVertically() },
+        ) {
             SettingsScreen(accesibilityViewModel)
         }
     }
 }
 
 
-
 @Composable
 fun LenguajeScreen() {
-    Box(contentAlignment = androidx.compose.ui.Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        Icon(imageVector = Icons.Default.Construction, contentDescription = "Página en construcción", modifier = Modifier.size(100.dp))
+    Box(
+        contentAlignment = androidx.compose.ui.Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Icon(
+            imageVector = Icons.Default.Construction,
+            contentDescription = "Página en construcción",
+            modifier = Modifier.size(100.dp)
+        )
     }
 }
-
 
 
 @Composable

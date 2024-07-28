@@ -63,7 +63,7 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
                 maxLines = 10,
                 supportingText = {
                     ScalableText(
-                        text = "Escriba su pregunta",
+                        text = "Escriba su consulta aquí",
                         textStyle = MaterialTheme.typography.titleLarge,
                         accessibilityViewModel = accessibilityViewModel
                     )
@@ -71,16 +71,15 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
             )
         }
 
-        // Define the ActivityResultLauncher
         val voiceLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { activityResult ->
             if (activityResult.resultCode == Activity.RESULT_OK) {
-                val results = activityResult.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                val results =
+                    activityResult.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 text = TextFieldValue(results?.get(0) ?: "")
             }
         }
-
 
         Column(
             verticalArrangement = Arrangement.Center,
@@ -92,25 +91,28 @@ fun KeyboardScreen(accessibilityViewModel: AccessibilityViewModel) {
                 selectedQuestion = text.text,
                 onClick = {
                     accessibilityViewModel.speakQuestion(text.text)
-                }
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
-            Spacer(modifier = Modifier.height(16.dp)) // Add space between buttons
+            Spacer(modifier = Modifier.height(32.dp))
+
 
             VoiceToTextButton(
                 accessibilityViewModel = accessibilityViewModel,
                 onClick = {
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(
+                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                        )
                         putExtra(RecognizerIntent.EXTRA_PROMPT, "Hable ahora...")
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
                     }
                     voiceLauncher.launch(intent)
                 }
             )
-        }
 
+        }
     }
 }
-
-

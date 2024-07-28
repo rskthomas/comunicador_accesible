@@ -12,11 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
@@ -73,14 +73,14 @@ fun ReadTextButton(
         Button(
             modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
             shape = CircleShape,
-            enabled = selectedQuestion != null,
+            enabled = !selectedQuestion.isNullOrEmpty(),
             onClick = onClick
         ) {
             Icon(
                 modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize),
                 imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                 contentDescription = "Leer en voz alta",
-                tint = if (selectedQuestion != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                tint = if (!selectedQuestion.isNullOrEmpty()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -97,23 +97,33 @@ fun VoiceToTextButton(
     modifier: Modifier = Modifier,
     accessibilityViewModel: AccessibilityViewModel,
     onClick: () -> Unit
+
 ) {
+
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    modifier = modifier,
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
+) {
+    IconButton(
+        modifier = Modifier.size(35.dp * accessibilityViewModel.buttonSize),
+        onClick = onClick
     ) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier.size(78.dp * accessibilityViewModel.buttonSize)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Mic,
-                contentDescription = "Escuchar",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
+        Icon(
+            modifier = Modifier.size(35.dp * accessibilityViewModel.buttonSize),
+            imageVector = Icons.Filled.Mic,
+            contentDescription = "Escuchar",
+            tint = MaterialTheme.colorScheme.secondary
+        )
     }
+    Spacer(modifier = Modifier.height(16.dp))
+    ScalableText(
+        "Escuchar",
+        textStyle = MaterialTheme.typography.titleMedium,
+        accessibilityViewModel,
+    )
+}
+
 }
 
 @Composable
@@ -127,24 +137,26 @@ fun CustomSlider(
 ) {
     val view = LocalView.current
     Slider(
+        colors = SliderDefaults.colors(
+            thumbColor = MaterialTheme.colorScheme.primary,
+            activeTrackColor = MaterialTheme.colorScheme.primary,
+            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        ),
         value = value,
         onValueChange = onValueChange,
         steps = 3,
         valueRange = valueRange,
         modifier = modifier
-            .clickable() {
+            .clickable {
                 view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             }
             .semantics {
                 contentDescription = "$label slider"
-            },
-        colors = SliderDefaults.colors(
-            thumbColor = lerp(
-                MaterialTheme.colorScheme.onSecondary,
-                MaterialTheme.colorScheme.secondary,
-                (value - 1f) / 0.8f
-            )
-        )
+            }
+            .sizeIn(
+                minHeight = (48.dp * viewModel.buttonSize),
+                minWidth = 200.dp * viewModel.buttonSize
+            ),
     )
 }
 
@@ -192,7 +204,9 @@ fun QuestionItem(
             )
 
             Text(
-                modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterVertically),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .align(Alignment.CenterVertically),
                 text = question,
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize * accessibilityViewModel.textScale,
                 //max text size is 20
