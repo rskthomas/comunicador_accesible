@@ -13,7 +13,6 @@ data class Settings(
     var ttsPitch: Float = 1.0f,
     var ttsLanguage: String = "es",
     var ttsVoice: String = "es-ES",
-    var ttsVolume: Float = 1.0f,
     var buttonSize: Float = 1.0f,
     var textScale: Float = 1.0f
 

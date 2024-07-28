@@ -1,62 +1,116 @@
 package info.unlp.comunicadoraccesible.data
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.media.AudioManager
-import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.util.Locale
 
-class AccessibilityViewModel : ViewModel() {
+class AccessibilityViewModel(private val appDao: AppDao, context: Context) : ViewModel() {
 
-
+    private var textToSpeech: TextToSpeech? = null
     private lateinit var audioManager: AudioManager
 
-    var volume by mutableStateOf(1f)
 
-    var textScale by mutableStateOf(1.0f)
-        private set
+    init {
+        try {
+            getSettings()
+        }finally {
+            initializeTextToSpeech(context)
+        }
+    }
+    private val _settings = MutableStateFlow<Settings>(Settings())
+    val settings: StateFlow<Settings> get() = _settings
+
+    var textScale by mutableFloatStateOf(1.0f)
+    var buttonSize by mutableFloatStateOf(1.0f)
+    var ttsVolume by mutableFloatStateOf(1.0f)
+    var ttsPitch by mutableFloatStateOf(1.0f)
+    var ttsSpeed by mutableFloatStateOf(1.0f)
+
+
 
     fun updateTextScale(newScale: Float) {
         textScale = newScale
+        _settings.value.textScale = newScale
     }
 
-    private var textToSpeech: TextToSpeech? = null
+    private fun updateSettings(settings: Settings) {
 
+        viewModelScope.launch {
+            appDao.updateSettings(settings)
+        }
+    }
+
+
+
+    private fun getSettings() {
+
+        viewModelScope.launch {
+            try {
+                if (appDao.isSettingsEmpty()) appDao.insertSettings(_settings.value)
+
+                else _settings.value = appDao.getSettings()
+            }finally {
+                textScale = settings.value.textScale
+                buttonSize = settings.value.buttonSize
+                ttsPitch = settings.value.ttsPitch
+                ttsSpeed = settings.value.ttsSpeed
+
+            }
+        }
+    }
 
 
     fun updateVolume(newVolume: Float) {
-        volume = newVolume
+
         val normalizedVolume = (newVolume - 1f) / 0.8f
         // Convert normalizedVolume to the scale used by the AudioManager
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val newVolumeLevel = (normalizedVolume * maxVolume).toInt()
 
-        // Set the new volume level
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolumeLevel, 0)
     }
-    //button size
-    var buttonSize by mutableStateOf(1.0f)
-        private set
+
+    fun updatePitch(newPitch: Float) {
+        ttsPitch = newPitch
+        applyTTSChanges()
+    }
+
+    fun updateSpeed(newSpeed: Float) {
+        ttsSpeed = newSpeed
+        applyTTSChanges()
+    }
+
+    private fun applyTTSChanges() {
+        textToSpeech?.setPitch(ttsPitch)
+        textToSpeech?.setSpeechRate(ttsSpeed)
+        textToSpeech?.setLanguage(Locale(settings.value.ttsLanguage))
+    }
+
 
     fun updateButtonSize(newSize: Float) {
         buttonSize = newSize
-
     }
-    fun initializeTextToSpeech(context: Context) {
-        //and also volume
+
+    private fun initializeTextToSpeech(context: Context) {
+
         audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         if (textToSpeech == null) {
-            textToSpeech = TextToSpeech(context) { status ->
-                if (status == TextToSpeech.SUCCESS) {
-                    textToSpeech?.language = Locale("es", "ES")
-                    textToSpeech?.setSpeechRate(1.0f)
+            // Initialize TextToSpeech with settings
+            textToSpeech = TextToSpeech(context) {
+                if (it == TextToSpeech.SUCCESS) {
+                    //set langauge
+
+                    applyTTSChanges()
                 }
             }
         }
@@ -70,14 +124,8 @@ class AccessibilityViewModel : ViewModel() {
         super.onCleared()
         textToSpeech?.stop()
         textToSpeech?.shutdown()
+        updateSettings(settings.value)
     }
 
-    fun startVoiceInput(activity: Activity, requestCode: Int) {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "Hable ahora...")
-        }
-        activity.startActivityForResult(intent, requestCode)
-    }
 
 }

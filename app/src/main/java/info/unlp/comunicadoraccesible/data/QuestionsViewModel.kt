@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.Normalizer
 
 
 val SAMPLE_CATEGORIES = listOf(
@@ -57,46 +58,46 @@ val SAMPLE_QUESTIONS = mapOf(
 
 class QuestionsViewModel(private val appDao: AppDao) : ViewModel() {
 
-
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories: StateFlow<List<Category>> get() = _categories
 
+    private val _all_questions = MutableStateFlow<List<Question>>(emptyList())
+
     private val _questions = MutableStateFlow<List<Question>>(emptyList())
     val questions: StateFlow<List<Question>> get() = _questions
-
 
     private val _currentCategory = MutableStateFlow<Category?>(null)
     val currentCategory: StateFlow<Category?> get() = _currentCategory
 
     init {
-
-        preloadDB()
-        retrieveData()
-
-    }
-
-    private fun deleteDB() {
         viewModelScope.launch {
-            appDao.deleteAllCategories()
-            appDao.deleteAllQuestions()
-            Log.d("QuestionsViewModel", "Database deleted")
+            dropTables()
+            if (appDao.isCategoriesEmpty()) {
+                preloadDB()
+            } else {
+                retrieveData()
+            }
         }
     }
 
+
+    private suspend fun dropTables() {
+
+        appDao.deleteAllCategories()
+        appDao.deleteAllQuestions()
+
+    }
+
     private fun preloadDB() {
-        deleteDB()
         viewModelScope.launch {
             try {
                 SAMPLE_CATEGORIES.forEach { categoryName ->
                     val category = Category(name = categoryName)
-                    val categoryId = appDao.insertCategory(category) // Get the category id
-
-                    Log.d("PreloadDB", "Inserted category $categoryName with id $categoryId")
+                    val categoryId = appDao.insertCategory(category)
 
                     SAMPLE_QUESTIONS[categoryName]?.forEach { questionText ->
                         val question = Question(text = questionText, categoryId = categoryId)
                         appDao.insertQuestion(question)
-                        Log.d("PreloadDB", "Inserted question $questionText")
                     }
                 }
             } catch (e: Exception) {
@@ -105,19 +106,17 @@ class QuestionsViewModel(private val appDao: AppDao) : ViewModel() {
                 retrieveData()
             }
         }
-
     }
 
     private fun retrieveData() {
         viewModelScope.launch {
-            // Load categories from the db and update the state
             _categories.value = appDao.getAllCategories()
-            _currentCategory.value = _categories.value.firstOrNull()
-            changeCategory(_currentCategory.value ?: return@launch)
             _questions.value = appDao.getAllQuestions()
+            _all_questions.value = _questions.value
+            _currentCategory.value = _categories.value.firstOrNull()
+            _currentCategory.value?.let { changeCategory(it) }
         }
     }
-
 
     fun changeCategory(category: Category) {
         _currentCategory.value = category
@@ -130,11 +129,18 @@ class QuestionsViewModel(private val appDao: AppDao) : ViewModel() {
         }
     }
 
+    //normalize the strings so the search is case insensitive and accent marks insensitive
+    private fun normalizeString(input: String): String {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+            .replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
+    }
+
     fun queryQuestions(query: String) {
+        val normalizedQuery = normalizeString(query)
         viewModelScope.launch {
-            _questions.value =
-                appDao.getAllQuestions().filter { it.text.contains(query, ignoreCase = true) }
+            _questions.value = _all_questions.value.filter {
+                normalizeString(it.text).contains(normalizedQuery, ignoreCase = true)
+            }
         }
     }
 }
-
