@@ -1,7 +1,5 @@
 package info.unlp.comunicadoraccesible.ui
 
-import android.content.Context
-import android.media.AudioManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,14 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import info.unlp.comunicadoraccesible.composables.CustomSlider
 import info.unlp.comunicadoraccesible.composables.ScalableText
 import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
 
 @Composable
-fun SettingsScreen(viewModel: AccessibilityViewModel) {
+fun SettingsScreen(viewModel: AccessibilityViewModel, navController: NavController) {
     val context = LocalContext.current
-    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
     Row(
         modifier = Modifier
@@ -159,9 +157,13 @@ fun SettingsScreen(viewModel: AccessibilityViewModel) {
         }
 
         FloatingActionButton(
-            onClick = { /* Handle edit questions action */ },
-            modifier = Modifier.align(Alignment.Bottom)
-                .padding(16.dp)
+            onClick = {
+                navController.navigate("editar")
+            },
+            modifier = Modifier
+                .padding(16.dp, 0.dp, 0.dp, 32.dp)
+                .width(200.dp * viewModel.buttonSize)
+                .align(Alignment.Bottom)
         ) {
 
             Row (
