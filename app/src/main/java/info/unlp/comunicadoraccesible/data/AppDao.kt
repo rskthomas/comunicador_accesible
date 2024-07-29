@@ -46,6 +46,13 @@ interface AppDao {
     @Query("DELETE FROM questions")
     suspend fun deleteAllQuestions()
 
+    //delete category
+    @Delete
+    suspend fun deleteCategory(category: Category)
+
+    //delete question
+    @Delete
+    suspend fun deleteQuestions(question: Question)
 
 
 
@@ -65,4 +72,13 @@ interface AppDao {
     //update
     @Update
     suspend fun updateSettings(settings: Settings)
+
+    //update category
+    @Update
+    suspend fun updateCategory(category: Category)
+
+    //update question
+    @Update
+    suspend fun updateQuestion(question: Question)
+
 }
