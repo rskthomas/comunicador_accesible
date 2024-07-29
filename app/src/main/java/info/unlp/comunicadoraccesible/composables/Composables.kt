@@ -1,6 +1,8 @@
 package info.unlp.comunicadoraccesible.composables
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -95,35 +97,41 @@ fun ReadTextButton(
 @Composable
 fun VoiceToTextButton(
     modifier: Modifier = Modifier,
+    text: String = "Escuchar",
     accessibilityViewModel: AccessibilityViewModel,
     onClick: () -> Unit
-
 ) {
-
     Column(
-    modifier = modifier,
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-) {
-    IconButton(
-        modifier = Modifier.size(35.dp * accessibilityViewModel.buttonSize),
-        onClick = onClick
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            modifier = Modifier.size(35.dp * accessibilityViewModel.buttonSize),
-            imageVector = Icons.Filled.Mic,
-            contentDescription = "Escuchar",
-            tint = MaterialTheme.colorScheme.secondary
+        IconButton(
+            modifier = Modifier
+                .size(65.dp * accessibilityViewModel.buttonSize)
+                .semantics { contentDescription = text }
+                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
+            onClick = onClick
+        ) {
+            Icon(
+                modifier = Modifier.size(35.dp * accessibilityViewModel.buttonSize),
+                imageVector = Icons.Filled.Mic,
+                contentDescription = text,
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        ScalableText(
+            text,
+            textStyle = MaterialTheme.typography.titleMedium,
+            accessibilityViewModel,
+            modifier = Modifier
+                .padding(8.dp)
+                .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
         )
     }
-    Spacer(modifier = Modifier.height(16.dp))
-    ScalableText(
-        "Escuchar",
-        textStyle = MaterialTheme.typography.titleMedium,
-        accessibilityViewModel,
-    )
-}
-
 }
 
 @Composable

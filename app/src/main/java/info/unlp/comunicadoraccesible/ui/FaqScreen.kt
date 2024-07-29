@@ -1,12 +1,18 @@
 package info.unlp.comunicadoraccesible.ui
 
 
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,10 +40,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import info.unlp.comunicadoraccesible.composables.QuestionItem
 import info.unlp.comunicadoraccesible.composables.ReadTextButton
 import info.unlp.comunicadoraccesible.composables.ScalableText
+import info.unlp.comunicadoraccesible.composables.VoiceToTextButton
 import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
 import info.unlp.comunicadoraccesible.data.Question
 import info.unlp.comunicadoraccesible.data.QuestionsViewModel
@@ -53,7 +61,8 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
 
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
     var searchSelected by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
+
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val questions by viewModel.questions.collectAsState()
 
     Log.d("FAQScreen", "Categories: $categories")
@@ -63,6 +72,16 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
     Log.d("FAQScreen", "Search selected: $searchSelected")
     Log.d("FAQScreen", "Search query: $searchQuery")
 
+    val voiceLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { activityResult ->
+        if (activityResult.resultCode == Activity.RESULT_OK) {
+            val results =
+                activityResult.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            searchQuery = TextFieldValue(results?.get(0) ?: "")
+            viewModel.queryQuestions(searchQuery.text)
+        }
+    }
 
     Column {
         Column {
@@ -87,7 +106,8 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                     selected = searchSelected,
                     onClick = {
                         searchSelected = true
-                        searchQuery = ""
+                        searchQuery = TextFieldValue("")
+                        viewModel.queryQuestions(searchQuery.text)
                     }
                 )
 
@@ -104,7 +124,9 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                         onClick = {
                             viewModel.changeCategory(category)
                             searchSelected = false
-                            searchQuery = ""
+                            searchQuery = TextFieldValue("")
+
+                            selectedQuestion = null
                         }
                     )
                 }
@@ -129,7 +151,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                         value = searchQuery,
                         onValueChange = {
                             searchQuery = it
-                            viewModel.queryQuestions(it)
+                            viewModel.queryQuestions(it.text)
                         },
                         label = { Text("Buscar preguntas") }
                     )
@@ -157,16 +179,43 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                 )
             }
 
-            ReadTextButton(
-                accessibilityViewModel = accessibilityViewModel,
-                selectedQuestion = selectedQuestion,
-                modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically),
-                onClick = {
-                    accessibilityViewModel.speakQuestion(selectedQuestion.orEmpty())
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                ReadTextButton(
+                    accessibilityViewModel = accessibilityViewModel,
+                    selectedQuestion = selectedQuestion,
+                    modifier = Modifier
+                        .weight(1f),
+                    onClick = {
+                        accessibilityViewModel.speakQuestion(selectedQuestion.orEmpty())
+                    }
+                )
+
+                AnimatedVisibility(searchSelected) {
+                    VoiceToTextButton(
+                        text = "Buscar por voz",
+                        accessibilityViewModel = accessibilityViewModel,
+                        onClick = {
+                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                putExtra(
+                                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                )
+                                putExtra(RecognizerIntent.EXTRA_PROMPT, "Hable ahora...")
+                                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                            }
+                            voiceLauncher.launch(intent)
+                        }
+                    )
                 }
-            )
+                Spacer(modifier = Modifier.height(32.dp))
+
+            }
+
         }
     }
 }
