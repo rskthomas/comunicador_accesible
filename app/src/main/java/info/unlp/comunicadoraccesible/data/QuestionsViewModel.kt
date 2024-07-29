@@ -108,6 +108,21 @@ class QuestionsViewModel(private val appDao: AppDao) : ViewModel() {
         }
     }
 
+    fun addCategory(category: String) {
+        viewModelScope.launch {
+            val newCategory = Category(name = category)
+            appDao.insertCategory(newCategory)
+            retrieveData()
+        }
+    }
+    fun addQuestion(question: String, category: Category) {
+        viewModelScope.launch {
+            val newQuestion = Question(text = question, categoryId = category.id)
+            appDao.insertQuestion(newQuestion)
+            retrieveData()
+        }
+    }
+
     private fun retrieveData() {
         viewModelScope.launch {
             _categories.value = appDao.getAllCategories()
@@ -117,6 +132,37 @@ class QuestionsViewModel(private val appDao: AppDao) : ViewModel() {
             _currentCategory.value?.let { changeCategory(it) }
         }
     }
+
+    fun deleteQuestion(question: String) {
+
+        val _question = _questions.value.find { it.text == question } ?: return
+        viewModelScope.launch {
+            appDao.deleteQuestions(_question)
+            retrieveData()
+        }
+    }
+
+    fun deleteCategory(category: Category) {
+        viewModelScope.launch {
+            appDao.deleteCategory(category)
+            retrieveData()
+        }
+    }
+    fun updateQuestion(oldQuestion: String, newQuestion: String) {
+        viewModelScope.launch {
+            val _question = _questions.value.find { it.text == oldQuestion } ?: return@launch
+            appDao.updateQuestion(_question.copy(text = newQuestion))
+            retrieveData()
+        }
+    }
+
+    fun updateCategory(oldCategory: Category, newCategory: String) {
+        viewModelScope.launch {
+            appDao.updateCategory(oldCategory.copy(name = newCategory))
+            retrieveData()
+        }
+    }
+
 
     fun changeCategory(category: Category) {
         _currentCategory.value = category
