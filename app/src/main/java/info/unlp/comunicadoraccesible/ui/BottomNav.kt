@@ -41,6 +41,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Teclado : Screen("teclado", "Teclado", Icons.Default.Keyboard)
     object Lenguaje : Screen("lenguaje", "Lenguaje", Icons.Default.CameraAlt)
     object Opciones : Screen("opciones", "Opciones", Icons.Default.Settings)
+    object EditQuestions : Screen("editar", "Editar preguntas", Icons.Default.Settings)
 }
 
 @Composable
@@ -142,7 +143,14 @@ fun Navigation(
             enterTransition = { slideInVertically() },
             exitTransition = { slideOutVertically() },
         ) {
-            SettingsScreen(accesibilityViewModel)
+            SettingsScreen(accesibilityViewModel, navController)
+        }
+        composable(
+            Screen.EditQuestions.route,
+            enterTransition = { slideInVertically() },
+            exitTransition = { slideOutVertically() },
+        ) {
+            EditQuestionsScreen(accesibilityViewModel, questionsViewModel, navController)
         }
     }
 }
