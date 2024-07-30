@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -118,10 +116,24 @@ fun EditQuestionsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp * accessibilityViewModel.buttonSize),
-                selectedTabIndex = if (currentCategory == null || searchSelected) 0 else categories.indexOf(
+                selectedTabIndex = if (currentCategory == null || searchSelected) 1 else categories.indexOf(
                     currentCategory
-                ) + 1,
+                ) + 2,
             ) {
+                //back arrow tab
+                Tab(
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver a las opciones",
+                            modifier = Modifier.size(24.dp * accessibilityViewModel.buttonSize)
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("opciones")
+                    }
+                )
                 // Search tab
                 Tab(
                     icon = {
@@ -164,7 +176,6 @@ fun EditQuestionsScreen(
                 SecondaryTabRow(
                     selectedTabIndex = 0, modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
                 ) {
                     OutlinedTextField(
                         textStyle = MaterialTheme.typography.bodyMedium,
@@ -189,13 +200,13 @@ fun EditQuestionsScreen(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(2f)
                     .align(Alignment.CenterVertically)
+                    .padding(4.dp)
             ) {
                 QuestionList(
                     accessibilityViewModel = accessibilityViewModel,
@@ -206,47 +217,19 @@ fun EditQuestionsScreen(
                     selectedQuestion = selectedQuestion
                 )
 
-                FloatingActionButton(
-                    onClick = {
-                        navController.navigate("opciones")
-                    },
-                    modifier = Modifier
-                        .padding(16.dp, 0.dp, 0.dp, 32.dp)
-                        .wrapContentHeight()
-                        .width(200.dp * accessibilityViewModel.buttonSize)
-                        .align(Alignment.BottomStart)
-
-                ) {
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(10.dp),
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-                    )
-                    {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver a las opciones")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        ScalableText(
-                            text = "Volver",
-                            textStyle = MaterialTheme.typography.bodyMedium,
-                            accessibilityViewModel
-                        )
-
-                    }
-                }
             }
 
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .align(Alignment.CenterVertically)
                     .verticalScroll(rememberScrollState())
             ) {
-                Column() {
+                Column {
                     ScalableButton(
                         icon = Icons.Outlined.Folder,
                         enabled = !searchSelected,
@@ -307,7 +290,7 @@ fun EditQuestionsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(50.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Column {
 
