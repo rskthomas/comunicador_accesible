@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -127,9 +126,6 @@ fun VoiceToTextButton(
             text,
             textStyle = MaterialTheme.typography.titleMedium,
             accessibilityViewModel,
-            modifier = Modifier
-                .padding(8.dp)
-                .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
         )
     }
 }
@@ -161,10 +157,7 @@ fun CustomSlider(
             .semantics {
                 contentDescription = "$label slider"
             }
-            .sizeIn(
-                minHeight = (48.dp * viewModel.buttonSize),
-                minWidth = 200.dp * viewModel.buttonSize
-            ),
+            .height(48.dp * viewModel.buttonSize),
     )
 }
 
@@ -188,7 +181,7 @@ fun QuestionItem(
 
             .heightIn(
                 min = 60.dp * accessibilityViewModel.buttonSize,
-                max = 80.dp * accessibilityViewModel.buttonSize
+                max = 100.dp * accessibilityViewModel.buttonSize
             )
             .fillMaxWidth()
             .clickable {

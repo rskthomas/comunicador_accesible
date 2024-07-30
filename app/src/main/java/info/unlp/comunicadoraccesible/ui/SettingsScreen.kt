@@ -161,7 +161,7 @@ fun SettingsScreen(viewModel: AccessibilityViewModel, navController: NavControll
                 navController.navigate("editar")
             },
             modifier = Modifier
-                .padding(16.dp, 0.dp, 0.dp, 32.dp)
+                .padding(16.dp, 0.dp, 0.dp, 16.dp)
                 .width(200.dp * viewModel.buttonSize)
                 .align(Alignment.Bottom)
         ) {

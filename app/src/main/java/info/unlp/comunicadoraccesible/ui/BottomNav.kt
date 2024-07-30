@@ -72,7 +72,7 @@ fun BottomNavigationBar(
         Screen.Lenguaje,
         Screen.Opciones
     )
-    NavigationBar(modifier = Modifier.height(65.dp * accessibilityViewModel.buttonSize)) {
+    NavigationBar(modifier = Modifier.height(75.dp * accessibilityViewModel.buttonSize)) {
         val currentRoute = currentRoute(navController)
         items.forEach { item ->
             NavigationBarItem(

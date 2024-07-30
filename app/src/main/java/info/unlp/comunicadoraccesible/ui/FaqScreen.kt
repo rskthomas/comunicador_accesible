@@ -83,13 +83,12 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
         }
     }
 
-    Column {
+    Column( modifier = Modifier.fillMaxSize()) {
         Column {
 
             ScrollableTabRow(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp * accessibilityViewModel.buttonSize),
+                    .fillMaxWidth(),
                 selectedTabIndex = if (currentCategory == null || searchSelected) 0 else categories.indexOf(
                     currentCategory
                 ) + 1,
@@ -103,6 +102,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                             modifier = Modifier.size(24.dp * accessibilityViewModel.buttonSize)
                         )
                     },
+                    modifier = Modifier.height(60.dp * accessibilityViewModel.buttonSize),
                     selected = searchSelected,
                     onClick = {
                         searchSelected = true
@@ -120,6 +120,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                                 accessibilityViewModel = accessibilityViewModel
                             )
                         },
+                        modifier = Modifier.height(60.dp * accessibilityViewModel.buttonSize),
                         selected = currentCategory == category,
                         onClick = {
                             viewModel.changeCategory(category)
@@ -162,7 +163,6 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
         ) {
             Box(
                 modifier = Modifier
