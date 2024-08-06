@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -46,7 +47,6 @@ fun SettingsScreen(viewModel: AccessibilityViewModel, navController: NavControll
     var ttsSpeed by remember { mutableFloatStateOf(1f) }
 
     Scaffold(
-        modifier = Modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
             TopAppBar(title = { Text("Opciones") })
         }
@@ -59,50 +59,50 @@ fun SettingsScreen(viewModel: AccessibilityViewModel, navController: NavControll
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SettingCheckbox("Modo Alto Contraste", checkBoxSetting) {
+            SettingCheckbox("Modo Alto Contraste", checkBoxSetting, viewModel) {
                 checkBoxSetting = it
             }
 
             HorizontalDivider()
             ScalableText(
                 text ="Interfaz",
-                textStyle = MaterialTheme.typography.titleMedium,
+                textStyle = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(vertical = 8.dp),
                 accessibilityViewModel = viewModel
             )
-            SettingSlider("Tamaño de letra", viewModel.textScale, valueRange = 1.0f .. 1.4f) { viewModel.updateTextScale(it) }
-            SettingSlider("Tamaño de la interfaz", viewModel.buttonSize, valueRange = 1.0f .. 1.4f) { viewModel.buttonSize = it }
+            SettingSlider("Tamaño de letra", viewModel.textScale, valueRange = 1.0f .. 1.4f, viewModel) { viewModel.updateTextScale(it) }
+            SettingSlider("Tamaño de la interfaz", viewModel.buttonSize, valueRange = 1.0f .. 1.4f, viewModel) { viewModel.buttonSize = it }
 
             HorizontalDivider()
             ScalableText(
                 "Texto a voz",
-                textStyle = MaterialTheme.typography.titleMedium,
+                textStyle = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(vertical = 8.dp),
                 accessibilityViewModel = viewModel
             )
 
-            SettingSlider("Tono de voz", viewModel.ttsPitch, valueRange = 0.5f..1.5f) {
+            SettingSlider("Tono de voz", viewModel.ttsPitch, valueRange = 0.5f..1.5f, viewModel) {
                 viewModel.updatePitch(it)
             }
-            SettingSlider("Velocidad", viewModel.ttsSpeed, valueRange = 0.5f .. 1.5f ) { viewModel.updateSpeed(it) }
+            SettingSlider("Velocidad", viewModel.ttsSpeed, valueRange = 0.5f .. 1.5f, viewModel) { viewModel.updateSpeed(it) }
 
             HorizontalDivider()
             ScalableText(
                 "Preguntas y categorías",
-                textStyle = MaterialTheme.typography.titleMedium,
+                textStyle = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(vertical = 8.dp),
                 accessibilityViewModel = viewModel
             )
 
             Row(
                 modifier = Modifier
+                    .clickable { navController.navigate("editar") }
                     .background(
                         MaterialTheme.colorScheme.errorContainer,
                         MaterialTheme.shapes.medium
                     )
                     .padding(16.dp)
-                    .fillMaxWidth()
-                    .clickable { navController.navigate("editar") },
+                    .fillMaxWidth(),
             ) {
                 Icon(Icons.Filled.Edit, contentDescription = "Edit Questions")
                 Spacer(modifier = Modifier.width(8.dp))
@@ -121,14 +121,16 @@ fun SettingsScreen(viewModel: AccessibilityViewModel, navController: NavControll
 
 
 @Composable
-fun SettingCheckbox(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun SettingCheckbox(label: String, checked: Boolean, viewModel: AccessibilityViewModel, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 10.dp)
+            .clickable { onCheckedChange(!checked) },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label)
+        ScalableText(text = label, textStyle = MaterialTheme.typography.bodyMedium, viewModel)
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange
@@ -141,6 +143,7 @@ fun SettingSlider(
     label: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    viewModel: AccessibilityViewModel,
     onValueChange: (Float) -> Unit,
 ) {
     Column(
@@ -148,7 +151,7 @@ fun SettingSlider(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        Text(label)
+        ScalableText(text = label, textStyle = MaterialTheme.typography.bodyMedium, viewModel)
         Slider(
             value = value,
             onValueChange = onValueChange,
