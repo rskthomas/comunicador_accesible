@@ -108,15 +108,14 @@ fun VoiceToTextButton(
     ) {
         IconButton(
             modifier = Modifier
-                .size(65.dp * accessibilityViewModel.buttonSize)
                 .semantics { contentDescription = text }
-                .padding(8.dp)
                 .background(MaterialTheme.colorScheme.primary, CircleShape)
-                .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
+                .border(3.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
+                .size(68.dp * accessibilityViewModel.buttonSize),
             onClick = onClick
         ) {
             Icon(
-                modifier = Modifier.size(35.dp * accessibilityViewModel.buttonSize),
+                modifier = Modifier.size(38.dp * accessibilityViewModel.buttonSize),
                 imageVector = Icons.Filled.Mic,
                 contentDescription = text,
                 tint = MaterialTheme.colorScheme.onPrimary
