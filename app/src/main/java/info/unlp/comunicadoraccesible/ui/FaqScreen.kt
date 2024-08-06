@@ -1,17 +1,11 @@
 package info.unlp.comunicadoraccesible.ui
 
 
-import android.app.Activity
-import android.content.Intent
-import android.speech.RecognizerIntent
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,9 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,11 +39,9 @@ import androidx.compose.ui.unit.dp
 import info.unlp.comunicadoraccesible.composables.QuestionItem
 import info.unlp.comunicadoraccesible.composables.ReadTextButton
 import info.unlp.comunicadoraccesible.composables.ScalableText
-import info.unlp.comunicadoraccesible.composables.VoiceToTextButton
 import info.unlp.comunicadoraccesible.data.AccessibilityViewModel
 import info.unlp.comunicadoraccesible.data.Question
 import info.unlp.comunicadoraccesible.data.QuestionsViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,51 +50,34 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
     val categories = viewModel.categories.collectAsState().value
     val currentCategory = viewModel.currentCategory.collectAsState().value
 
-
     var selectedQuestion by remember { mutableStateOf<String?>(null) }
     var searchSelected by remember { mutableStateOf(false) }
-
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val questions by viewModel.questions.collectAsState()
 
-    Log.d("FAQScreen", "Categories: $categories")
-    Log.d("FAQScreen", "Current category: $currentCategory")
-    Log.d("FAQScreen", "Questions: $questions")
-    Log.d("FAQScreen", "Selected question: $selectedQuestion")
-    Log.d("FAQScreen", "Search selected: $searchSelected")
-    Log.d("FAQScreen", "Search query: $searchQuery")
 
-    val voiceLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { activityResult ->
-        if (activityResult.resultCode == Activity.RESULT_OK) {
-            val results =
-                activityResult.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            searchQuery = TextFieldValue(results?.get(0) ?: "")
-            viewModel.queryQuestions(searchQuery.text)
-        }
-    }
-
-    Column( modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Column {
-
             ScrollableTabRow(
+                edgePadding = 8.dp,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(80.dp * accessibilityViewModel.buttonSize),
                 selectedTabIndex = if (currentCategory == null || searchSelected) 0 else categories.indexOf(
                     currentCategory
                 ) + 1,
             ) {
-                //Searchtab
+
                 Tab(
+                    modifier = Modifier.background(if (searchSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.extraSmall),
                     icon = {
                         Icon(
-                            if (searchSelected) Icons.Outlined.Search else Icons.Filled.Search,
+                            Icons.Filled.Search ,
                             contentDescription = "Buscar preguntas",
-                            modifier = Modifier.size(24.dp * accessibilityViewModel.buttonSize)
+                            modifier = Modifier.size(28.dp * accessibilityViewModel.buttonSize),
+                            tint = if (searchSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
                         )
                     },
-                    modifier = Modifier.height(60.dp * accessibilityViewModel.buttonSize),
                     selected = searchSelected,
                     onClick = {
                         searchSelected = true
@@ -116,17 +91,15 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                         text = {
                             ScalableText(
                                 text = category.name,
-                                textStyle = MaterialTheme.typography.bodyMedium,
+                                textStyle = MaterialTheme.typography.bodyLarge ,
                                 accessibilityViewModel = accessibilityViewModel
                             )
                         },
-                        modifier = Modifier.height(60.dp * accessibilityViewModel.buttonSize),
                         selected = currentCategory == category,
                         onClick = {
                             viewModel.changeCategory(category)
                             searchSelected = false
                             searchQuery = TextFieldValue("")
-
                             selectedQuestion = null
                         }
                     )
@@ -147,7 +120,6 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                                 min = 60.dp * accessibilityViewModel.buttonSize,
                                 max = 80.dp * accessibilityViewModel.buttonSize
                             ),
-
                         singleLine = true,
                         value = searchQuery,
                         onValueChange = {
@@ -160,14 +132,15 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(16.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .weight(2.7f)
-                    .align(Alignment.CenterVertically)
+                    .weight(3.4f)
+                    .fillMaxWidth()
             ) {
                 QuestionList(
                     accessibilityViewModel = accessibilityViewModel,
@@ -179,7 +152,6 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                 )
             }
 
-
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,36 +161,19 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
                     accessibilityViewModel = accessibilityViewModel,
                     selectedQuestion = selectedQuestion,
                     modifier = Modifier
-                        .weight(1f),
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                     onClick = {
                         accessibilityViewModel.speakQuestion(selectedQuestion.orEmpty())
                     }
                 )
 
-                AnimatedVisibility(searchSelected) {
-                    VoiceToTextButton(
-                        text = "Buscar por voz",
-                        accessibilityViewModel = accessibilityViewModel,
-                        onClick = {
-                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                putExtra(
-                                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                                )
-                                putExtra(RecognizerIntent.EXTRA_PROMPT, "Hable ahora...")
-                                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
-                            }
-                            voiceLauncher.launch(intent)
-                        }
-                    )
-                }
                 Spacer(modifier = Modifier.height(32.dp))
-
             }
-
         }
     }
 }
+
 
 
 @Composable
@@ -228,7 +183,6 @@ fun QuestionList(
     onSelectQuestion: (String) -> Unit,
     selectedQuestion: String?
 ) {
-
     if (questions.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -243,28 +197,32 @@ fun QuestionList(
         return
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
-        horizontalArrangement = Arrangement.spacedBy(9.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .height(340.dp * accessibilityViewModel.buttonSize)
-            .padding(24.dp)
-    ) {
+    val gridState = rememberLazyGridState()
 
-        items(questions.size) { index ->
-            val question = questions[index]
-            val isSelected = question.text == selectedQuestion
-            QuestionItem(
-                accessibilityViewModel,
-                question = question.text,
-                isSelected = isSelected,
-                onClick = {
-                    onSelectQuestion(question.text)
-                })
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(400.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp),
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            state = gridState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+            items(questions.size) { index ->
+                val question = questions[index]
+                val isSelected = question.text == selectedQuestion
+                QuestionItem(
+                    accessibilityViewModel,
+                    question = question.text,
+                    isSelected = isSelected,
+                    onClick = {
+                        onSelectQuestion(question.text)
+                    }
+                )
+            }
         }
+
     }
 }
 

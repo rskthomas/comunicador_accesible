@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -168,7 +169,6 @@ fun QuestionItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-
     val haptic = LocalHapticFeedback.current
     Card(
         elevation = CardDefaults.elevatedCardElevation(8.dp),
@@ -178,22 +178,23 @@ fun QuestionItem(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
         ),
         modifier = Modifier
-
             .heightIn(
                 min = 60.dp * accessibilityViewModel.buttonSize,
-                max = 100.dp * accessibilityViewModel.buttonSize
+                max = 200.dp * accessibilityViewModel.buttonSize
             )
-            .fillMaxWidth()
+            .width(300.dp)
             .clickable {
                 onClick()
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
+            .semantics { contentDescription = "Question item: $question" }
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
-                .fillMaxHeight()
+                .wrapContentSize(Alignment.CenterStart),
+            verticalAlignment = Alignment.Top
         ) {
             Checkbox(
                 checked = isSelected,
@@ -201,19 +202,16 @@ fun QuestionItem(
                 modifier = Modifier
                     .size(24.dp)
                     .padding(start = 16.dp, end = 8.dp)
-                    .align(Alignment.CenterVertically)
+                    .align(Alignment.CenterVertically),
             )
 
             Text(
                 modifier = Modifier
-                    .padding(start = 16.dp)
-                    .align(Alignment.CenterVertically),
+                    .padding(start = 16.dp),
                 text = question,
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize * accessibilityViewModel.textScale,
-                //max text size is 20
-
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
             )
         }
-
     }
 }
