@@ -139,7 +139,7 @@ fun FAQScreen(accessibilityViewModel: AccessibilityViewModel, viewModel: Questio
         ) {
             Box(
                 modifier = Modifier
-                    .weight(3.4f)
+                    .weight(3.2f)
                     .fillMaxWidth()
             ) {
                 QuestionList(
