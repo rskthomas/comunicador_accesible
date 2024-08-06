@@ -2,6 +2,7 @@ package info.unlp.comunicadoraccesible.ui
 
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,14 +16,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.QuestionMark
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -113,15 +111,20 @@ fun EditQuestionsScreen(
     Column {
         Column {
             ScrollableTabRow(
+                edgePadding = 8.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp * accessibilityViewModel.buttonSize),
+                    .height(80.dp * accessibilityViewModel.buttonSize),
                 selectedTabIndex = if (currentCategory == null || searchSelected) 1 else categories.indexOf(
                     currentCategory
                 ) + 2,
             ) {
                 //back arrow tab
                 Tab(
+                    modifier = Modifier.background(
+                        if (searchSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.shapes.extraSmall
+                    ),
                     icon = {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -134,13 +137,14 @@ fun EditQuestionsScreen(
                         navController.navigate("opciones")
                     }
                 )
-                // Search tab
+
                 Tab(
                     icon = {
                         Icon(
-                            if (searchSelected) Icons.Outlined.Search else Icons.Filled.Search,
+                            Icons.Filled.Search,
                             contentDescription = "Buscar preguntas",
-                            modifier = Modifier.size(24.dp * accessibilityViewModel.buttonSize)
+                            modifier = Modifier.size(28.dp * accessibilityViewModel.buttonSize),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     },
                     selected = searchSelected,
@@ -197,15 +201,15 @@ fun EditQuestionsScreen(
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .weight(3.5f)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(2f)
-                    .align(Alignment.CenterVertically)
                     .padding(4.dp)
             ) {
                 QuestionList(
@@ -220,14 +224,12 @@ fun EditQuestionsScreen(
             }
 
             Row(
-                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
+                    .fillMaxSize()
                     .weight(1f)
-                    .fillMaxHeight()
                     .padding(8.dp)
-                    .align(Alignment.CenterVertically)
-                    .verticalScroll(rememberScrollState())
             ) {
                 Column {
                     ScalableButton(
@@ -302,7 +304,8 @@ fun EditQuestionsScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                         onClick = {
                             title = "Agregar Pregunta"
-                            description = "¿Quiere agregar una pregunta a la categoría ${currentCategory?.name}?"
+                            description =
+                                "¿Quiere agregar una pregunta a la categoría ${currentCategory?.name}?"
                             text = ""
                             onConfirmEdit = { newText ->
                                 currentCategory?.let {
